@@ -2,4 +2,4 @@
 /dist
 .env
 package-lock.json
-nkym-site-firebase-adminsdk.json
+/secure/firebase-key.json
