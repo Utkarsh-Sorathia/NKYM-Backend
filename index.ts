@@ -16,6 +16,7 @@ app.use(
     origin: [
       'http://192.168.1.27:5173',
       'http://localhost:5173',
+      'https://nkym.vercel.app/'
     ],
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -30,6 +31,20 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req: Request, res: Response) => {
   res.send('Welcome to the gms backend server!');
 });
+
+// POST endpoint for admin key verification
+app.post('/api/verify-admin', (req:Request, res:Response) => {
+  const { adminKey } = req.body;
+  if (!adminKey) {
+    res.status(400).json({ valid: false, error: "Admin key is required" });
+  }
+  if (adminKey === process.env.ADMIN_KEY) {
+    res.json({ valid: true });
+  } else {
+    res.status(403).json({ valid: false, error: "Invalid admin key" });
+  }
+});
+
 
 app.use('/gallery', galleryRouter);
 app.use('/events', eventsRouter);
