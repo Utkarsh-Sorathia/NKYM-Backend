@@ -5,15 +5,10 @@ export const createEvent = async (req: Request, res: Response) => {
     try {
         const { title, date, time, description, location } = req.body;
         if (!title || !date || !time || !description) {
-            return res.status(400).json({ error: 'Missing required fields' });
+            res.status(400).json({ error: 'Missing required fields' });
+            return;
         }
-        const eventDoc = {
-            title,
-            date,
-            time,
-            description,
-            location: location || '',
-        };
+        const eventDoc = { title, date, time, description, location: location || '' };
         await db.collection('Events').add(eventDoc);
         res.status(201).json({ success: true, event: eventDoc });
     } catch (err) {
@@ -34,12 +29,12 @@ export const getAllEvents = async (req: Request, res: Response) => {
     }
 };
 
-
 export const deleteEvent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ error: 'Event ID is required' });
+            res.status(400).json({ error: 'Event ID is required' });
+            return;
         }
         await db.collection('Events').doc(id).delete();
         res.status(200).json({ success: true, message: 'Event deleted successfully' });
@@ -52,7 +47,8 @@ export const updateEvent = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         if (!id) {
-            return res.status(400).json({ error: 'Event ID is required' });
+            res.status(400).json({ error: 'Event ID is required' });
+            return;
         }
         const { title, date, time, description, location } = req.body;
         await db.collection('Events').doc(id).update({ title, date, time, description, location });
@@ -61,3 +57,4 @@ export const updateEvent = async (req: Request, res: Response) => {
         res.status(500).json({ success: false, error: (err as Error).message });
     }
 };
+

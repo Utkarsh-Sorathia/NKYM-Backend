@@ -48,38 +48,35 @@ export const getAllGalleryImages = async (req: Request, res: Response) => {
 
 // Update gallery item metadata in Firestore only
 export const updateGalleryImage = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params; // Firestore doc ID
-    if (!id) {
-      return res.status(400).json({ error: 'Gallery item ID is required' });
+    try {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ error: 'Gallery item ID is required' });
+            return;
+        }
+        const { name, imageUrl, uploaded } = req.body;
+        await db.collection('Gallery').doc(id).update({
+            ...(name && { name }),
+            ...(imageUrl && { imageUrl }),
+            ...(uploaded && { uploaded }),
+        });
+        res.status(200).json({ success: true, message: 'Gallery item updated successfully' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: (err as Error).message });
     }
-    const { name, imageUrl, uploaded } = req.body;
-
-    await db.collection('Gallery').doc(id).update({
-      ...(name && { name }),
-      ...(imageUrl && { imageUrl }),
-      ...(uploaded && { uploaded }),
-    });
-
-    res.status(200).json({ success: true, message: 'Gallery item updated successfully' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: (err as Error).message });
-  }
 };
 
 // Delete gallery item metadata in Firestore only
 export const deleteGalleryImage = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params; // Firestore doc ID
-    if (!id) {
-      return res.status(400).json({ error: 'Gallery item ID is required' });
+    try {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({ error: 'Gallery item ID is required' });
+            return;
+        }
+        await db.collection('Gallery').doc(id).delete();
+        res.status(200).json({ success: true, message: 'Gallery item deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ success: false, error: (err as Error).message });
     }
-
-    await db.collection('Gallery').doc(id).delete();
-
-    res.status(200).json({ success: true, message: 'Gallery item deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ success: false, error: (err as Error).message });
-  }
 };
-
