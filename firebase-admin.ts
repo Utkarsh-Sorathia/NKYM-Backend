@@ -1,17 +1,23 @@
 import { initializeApp, cert, ServiceAccount } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import path from 'path';
+import { config } from 'dotenv';
 
-const credentialPath = process.env.FIREBASE_CREDENTIAL_PATH;
+config(); // optional, for local .env use
 
-if (!credentialPath) {
-  throw new Error('FIREBASE_CREDENTIAL_PATH is not defined in the environment variables.');
+const credentials = process.env.FIREBASE_CREDENTIALS;
+
+if (!credentials) throw new Error('FIREBASE_CREDENTIALS is not set');
+
+let serviceAccount: ServiceAccount;
+
+try {
+  serviceAccount = JSON.parse(credentials);
+} catch (error) {
+  throw new Error('Invalid FIREBASE_CREDENTIALS JSON: ' + error);
 }
 
-const serviceAccount = require(path.resolve(credentialPath)) as ServiceAccount;
-
 initializeApp({
-  credential: cert(serviceAccount)
+  credential: cert(serviceAccount),
 });
 
 export const db = getFirestore();
