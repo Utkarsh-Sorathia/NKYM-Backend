@@ -16,7 +16,8 @@ app.use(
     origin: [
       'http://192.168.1.27:5173',
       'http://localhost:5173',
-      'https://nkym.vercel.app'
+      'https://nkym.vercel.app',
+      'https://cautious-invention-4r4qv5prww7f579g-5173.app.github.dev'
     ],
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization'],
