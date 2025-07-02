@@ -16,7 +16,7 @@ app.use(
     origin: [
       'http://192.168.1.27:5173',
       'http://localhost:5173',
-      'https://nkym.vercel.app/'
+      'https://nkym.vercel.app'
     ],
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization'],
