@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '../utils/cloudinary'
 import { db } from '../firebase-admin';
 
 export const createGalleryImage = async (req: Request, res: Response) => {
