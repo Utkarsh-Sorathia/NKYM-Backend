@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NKYM-Backend | Welcome</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "Arial", "sans-serif"],
+            },
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#6366F1",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-tr from-indigo-100 via-white to-indigo-200 flex items-center justify-center px-4 font-sans"
+  >
+    <div class="relative max-w-4xl w-full">
+      <div
+        class="h-2 rounded-t-2xl bg-gradient-to-r from-indigo-400 via-indigo-300 to-indigo-400"
+      ></div>
+
+      <div
+        class="bg-white p-8 sm:p-10 rounded-b-2xl shadow-xl transition-all duration-300 hover:shadow-2xl"
+      >
+        <div class="flex flex-col md:flex-row items-center gap-10">
+          <div class="flex-shrink-0 animate-pulse">
+            <img
+              src="/favicon.ico"
+              alt="Ganesha Logo"
+              class="w-64 h-64 object-contain rounded-full border-4 border-indigo-200 shadow-md transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+
+          <div class="text-center md:text-left">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">
+              Welcome to <span class="text-primary">NKYM-Backend</span>
+            </h1>
+
+            <div
+              class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start"
+            >
+              <a
+                href="https://nkym.vercel.app/admin/dashboard"
+                class="px-6 py-3 rounded-md bg-primary text-white text-sm font-semibold shadow hover:bg-indigo-600 transition"
+              >
+                Go to Admin Panel
+              </a>
+              <a
+                href="https://nkym.vercel.app"
+                target="_blank"
+                class="px-6 py-3 rounded-md bg-white border border-gray-300 text-gray-700 text-sm font-semibold shadow hover:bg-gray-100 transition"
+              >
+                Visit Website
+              </a>
+            </div>
+
+            <div class="text-sm text-gray-500 italic border-t pt-4 mt-6">
+              <%= date %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

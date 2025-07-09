@@ -30,7 +30,17 @@ app.use(morgan('dev'));
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req: Request, res: Response) => {
-  res.send('Welcome to the gms backend server!');
+  const now = new Date();
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    weekday: 'long',
+  };
+  const formattedDate = now.toLocaleDateString('en-GB', options);
+
+  res.render('index', { date: formattedDate });
 });
 
 // POST endpoint for admin key verification
