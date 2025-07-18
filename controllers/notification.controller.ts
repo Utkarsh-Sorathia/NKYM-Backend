@@ -174,3 +174,22 @@ export const sendEventNotification = async (eventData: any) => {
     }
   );
 };
+
+export const getNotificationLogs = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const snapshot = await db
+      .collection('NotificationLogs')
+      .orderBy('sentAt', 'desc')
+      .get();
+
+    const logs = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    res.status(200).json({ success: true, logs });
+  } catch (error) {
+    console.error('🚨 Error fetching notification logs:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch logs' });
+  }
+};
