@@ -49,6 +49,10 @@ export class NotificationService {
         .get();
 
       const tokens = tokensSnapshot.docs.map(doc => doc.data().fcmToken);
+      console.log(tokens);
+      
+      console.log(`Found ${tokens.length} active FCM tokens`);
+      
 
       if (tokens.length === 0) {
         console.warn('⚠️ No FCM tokens to send notifications.');
