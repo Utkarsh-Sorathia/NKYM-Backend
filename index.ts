@@ -11,6 +11,7 @@ app.set('view engine', 'ejs');
 
 import galleryRouter from './routers/gallery.route'
 import eventsRouter from './routers/events.route';
+import notificationRouter from './routers/notfication.route';
 
 app.use(
   cors({
@@ -60,6 +61,7 @@ app.post('/api/verify-admin', (req:Request, res:Response) => {
 
 app.use('/gallery', galleryRouter);
 app.use('/events', eventsRouter);
+app.use('/notifications', notificationRouter)
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

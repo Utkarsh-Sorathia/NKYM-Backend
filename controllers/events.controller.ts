@@ -1,19 +1,32 @@
 import { Request, Response } from 'express';
 import { db } from '../firebase-admin';
+import { sendEventNotification } from './notification.controller';
 
 export const createEvent = async (req: Request, res: Response) => {
-    try {
-        const { title, date, time, description, location } = req.body;
-        if (!title || !date || !time || !description) {
-            res.status(400).json({ error: 'Missing required fields' });
-            return;
-        }
-        const eventDoc = { title, date, time, description, location: location || '' };
-        await db.collection('Events').add(eventDoc);
-        res.status(201).json({ success: true, event: eventDoc });
-    } catch (err) {
-        res.status(500).json({ success: false, error: (err as Error).message });
+  try {
+    const { title, date, time, description, location } = req.body;
+    
+    if (!title || !date || !time || !description) {
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
     }
+    
+    const eventDoc = { title, date, time, description, location: location || '' };
+    const docRef = await db.collection('Events').add(eventDoc);
+    
+    // Send notification to all users
+    const eventWithId = { ...eventDoc, id: docRef.id };
+    await sendEventNotification(eventWithId);
+    
+    res.status(201).json({ 
+      success: true, 
+      event: eventWithId,
+      message: 'Event created and notifications sent successfully'
+    });
+  } catch (err) {
+    console.error('Error creating event:', err);
+    res.status(500).json({ success: false, error: (err as Error).message });
+  }
 };
 
 export const getAllEvents = async (req: Request, res: Response) => {
