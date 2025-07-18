@@ -59,13 +59,16 @@ export class NotificationService {
 
       // Prepare the multicast message
       const multicastMessage: admin.messaging.MulticastMessage = {
-        notification: {
-          title,
-          body,
-        },
-        tokens,
-        data: data || {}
-      };
+  tokens,
+  data: {
+    title,
+    body,
+    icon: '/icon.png',
+    click_action: data?.click_action || 'https://nkym.vercel.app/#events',
+    ...data // merge any additional data
+  }
+};
+
 
       // Send notifications
       const response = await admin.messaging().sendEachForMulticast(multicastMessage);
