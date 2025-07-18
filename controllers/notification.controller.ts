@@ -2,21 +2,20 @@ import { Request, Response } from 'express';
 import admin from 'firebase-admin';
 import { db } from '../firebase-admin';
 
-// Enhanced notification service with FCM
 export class NotificationService {
   private static instance: NotificationService;
 
   private constructor() { }
 
-  static getInstance(): NotificationService {
+  public static getInstance(): NotificationService {
     if (!NotificationService.instance) {
       NotificationService.instance = new NotificationService();
     }
     return NotificationService.instance;
   }
 
-  // Save FCM token from frontend
-  async saveUserToken(req: Request, res: Response): Promise<any | void> {
+  // Save user FCM token into Firestore
+  public async saveUserToken(req: Request, res: Response): Promise<any | void> {
     try {
       const { token, userId } = req.body;
 
@@ -24,8 +23,7 @@ export class NotificationService {
         return res.status(400).json({ error: 'FCM token is required' });
       }
 
-      // Save to Firestore with your existing structure
-      await db.collection('UserTokens').doc(userId || 'anonymous').set({
+      await db.collection('UserTokens').doc(userId || `anon_${Date.now()}`).set({
         fcmToken: token,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         isActive: true
@@ -36,100 +34,108 @@ export class NotificationService {
         message: 'Token saved successfully'
       });
     } catch (error) {
-      console.error('Error saving FCM token:', error);
+      console.error('🔥 Error saving FCM token:', error);
       res.status(500).json({ error: (error as Error).message });
     }
   }
 
-  // Send notification to all active users
-  async sendNotificationToAll(title: string, body: string, data?: any) {
+  // Send notification to all active tokens
+  public async sendNotificationToAll(title: string, body: string, data?: any) {
     try {
       const tokensSnapshot = await db.collection('UserTokens')
         .where('isActive', '==', true)
         .get();
 
       const tokens = tokensSnapshot.docs.map(doc => doc.data().fcmToken);
-      console.log(tokens);
-      
-      console.log(`Found ${tokens.length} active FCM tokens`);
-      
+      console.log(`📨 Found ${tokens.length} active FCM tokens:`, tokens);
 
       if (tokens.length === 0) {
-        console.warn('⚠️ No FCM tokens to send notifications.');
-        return;
+        console.warn('⚠️ No FCM tokens found to send notifications.');
+        return {
+          successCount: 0,
+          failureCount: 0,
+        };
       }
 
-      // Now safe to use 'tokens' in batch message
-      const message = {
+      // Prepare the multicast message
+      const multicastMessage: admin.messaging.MulticastMessage = {
         notification: {
           title,
           body,
-          icon: '/favicon.ico'
         },
-        tokens, // ✅ only used if not empty
+        tokens,
         data: data || {}
       };
 
-      const response = await admin.messaging().sendEachForMulticast(message);
+      // Send notifications
+      const response = await admin.messaging().sendEachForMulticast(multicastMessage);
+      console.log(`✅ Notification sent: ${response.successCount} success, ${response.failureCount} failure`);
 
-
-      // Clean up invalid tokens
+      // Cleanup any invalid tokens
       await this.cleanupInvalidTokens(response, tokens);
 
-      // Log notification for analytics
+      // Log to Firestore
       await db.collection('NotificationLogs').add({
         title,
         body,
         sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        tokensSent: tokens.length,
         successCount: response.successCount,
-        failureCount: response.failureCount,
-        totalTokens: tokens.length
+        failureCount: response.failureCount
       });
 
-      console.log(`Notification sent: ${response.successCount} success, ${response.failureCount} failure`);
       return response;
     } catch (error) {
-      console.error('Error sending notification:', error);
+      console.error('🚨 Failed to send notifications:', error);
       throw error;
     }
   }
 
-  // Clean up invalid/expired tokens
-  private async cleanupInvalidTokens(response: admin.messaging.BatchResponse, tokens: string[]) {
+  // Remove invalid or unregistered tokens from Firestore
+  private async cleanupInvalidTokens(
+    response: admin.messaging.BatchResponse,
+    tokens: string[]
+  ): Promise<void> {
     const invalidTokens: string[] = [];
 
     response.responses.forEach((resp, idx) => {
       if (!resp.success) {
         const errorCode = resp.error?.code;
-        if (errorCode === 'messaging/invalid-registration-token' ||
-          errorCode === 'messaging/registration-token-not-registered') {
+        if (
+          errorCode === 'messaging/invalid-registration-token' ||
+          errorCode === 'messaging/registration-token-not-registered'
+        ) {
           invalidTokens.push(tokens[idx]);
         }
       }
     });
 
-    // Remove invalid tokens from database
-    const batch = db.batch();
-    const tokensSnapshot = await db.collection('UserTokens')
+    if (invalidTokens.length === 0) {
+      console.log('✅ No invalid tokens to clean up.');
+      return;
+    }
+
+    const snapshot = await db
+      .collection('UserTokens')
       .where('fcmToken', 'in', invalidTokens)
       .get();
 
-    tokensSnapshot.docs.forEach(doc => {
+    const batch = db.batch();
+    snapshot.forEach((doc) => {
       batch.update(doc.ref, { isActive: false });
     });
 
-    if (invalidTokens.length > 0) {
-      await batch.commit();
-      console.log(`Cleaned up ${invalidTokens.length} invalid tokens`);
-    }
+    await batch.commit();
+    console.log(`🧹 Cleaned up ${invalidTokens.length} invalid tokens`);
   }
 }
 
-// Controller methods
+// Controller: Save token API handler
 export const saveUserToken = (req: Request, res: Response) => {
   return NotificationService.getInstance().saveUserToken(req, res);
 };
 
+// Controller: Send custom notification API handler
 export const sendCustomNotification = async (req: Request, res: Response): Promise<any | void> => {
   try {
     const { title, body, data } = req.body;
@@ -143,27 +149,28 @@ export const sendCustomNotification = async (req: Request, res: Response): Promi
 
     res.status(200).json({
       success: true,
-      message: `Notification sent successfully`,
+      message: 'Notification sent successfully',
       details: {
-        successCount: response?.successCount || 0,
-        failureCount: response?.failureCount || 0
-      }
+        successCount: response.successCount || 0,
+        failureCount: response.failureCount || 0,
+      },
     });
   } catch (error) {
+    console.error('🚨 Error in sendCustomNotification:', error);
     res.status(500).json({ error: (error as Error).message });
   }
 };
 
-// Enhanced event notification (integrate with your existing events controller)
+// Controller: Called internally after event creation
 export const sendEventNotification = async (eventData: any) => {
   const notificationService = NotificationService.getInstance();
-  return notificationService.sendNotificationToAll(
-    'New Ganesh Utsav Event! 🎉',
-    `${eventData.title} - ${eventData.date}`,
+  return await notificationService.sendNotificationToAll(
+    '🎉 New Ganesh Utsav Event!',
+    `${eventData?.title} - ${eventData?.date}`,
     {
-      eventId: eventData.id,
+      eventId: eventData?.id || '',
       type: 'event',
-      action: 'view_event'
+      action: 'view_event',
     }
   );
 };
