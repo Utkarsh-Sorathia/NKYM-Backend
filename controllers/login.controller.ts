@@ -7,7 +7,7 @@ export const adminLogin = (req: Request, res: Response) => {
 
   if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
     const token = jwt.sign({ isAdmin: true }, JWT_SECRET as string, { expiresIn: '2h' });
-    res.json({ token });
+    res.json({ message:"Admin logged in successfully", token });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }
