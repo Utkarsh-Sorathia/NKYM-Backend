@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../firebase-admin';
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from '../utils/cloudinary';
 
 export const togglePopupContent = async (req: Request, res: Response) => {
     try {
