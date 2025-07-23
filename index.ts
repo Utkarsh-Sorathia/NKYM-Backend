@@ -13,6 +13,7 @@ import galleryRouter from './routers/gallery.route'
 import eventsRouter from './routers/events.route';
 import notificationRouter from './routers/notfication.route';
 import adminRoutes from './routers/login.route';
+import popupRoutes from './routers/popup.route';
 
 app.use(
   cors({
@@ -64,6 +65,7 @@ app.use('/admin', adminRoutes);
 app.use('/gallery', galleryRouter);
 app.use('/events', eventsRouter);
 app.use('/notifications', notificationRouter)
+app.use('/api', popupRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
