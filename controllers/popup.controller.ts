@@ -2,6 +2,19 @@ import { Request, Response } from 'express';
 import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../firebase-admin';
 
+export const togglePopupContent = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isEnabled } = req.body;
+
+    await db.collection('popupContent').doc(id).update({ isEnabled });
+    res.status(200).json({ message: `Popup ${id} updated` });
+  } catch (error) {
+    console.error('Error updating popup content:', error);
+    res.status(500).send('Server error');
+  }
+};
+
 export const getEnabledPopupContent = async (req: Request, res: Response): Promise<void> => {
   try {
     const snapshot = await db.collection('popupContent')
