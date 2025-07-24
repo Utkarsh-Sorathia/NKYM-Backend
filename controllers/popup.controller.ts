@@ -19,7 +19,7 @@ export const togglePopupContent = async (req: Request, res: Response) => {
 export const getEnabledPopupContent = async (req: Request, res: Response): Promise<void> => {
     try {
         const snapshot = await db.collection('popupContent')
-            // .where('isEnabled', '==', true)
+            .where('isEnabled', '==', true)
             .orderBy('createdAt', 'desc')
             .get();
 
