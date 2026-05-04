@@ -8,7 +8,7 @@ export const togglePopupContent = async (req: Request, res: Response) => {
         const { id } = req.params;
         const { isEnabled } = req.body;
 
-        await db.collection('popupContent').doc(id).update({ isEnabled });
+        await db.collection('popupContent').doc(id as string).update({ isEnabled });
         res.status(200).json({ message: `Popup ${id} updated` });
     } catch (error) {
         console.error('Error updating popup content:', error);

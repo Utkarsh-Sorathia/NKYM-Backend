@@ -49,7 +49,7 @@ export const deleteEvent = async (req: Request, res: Response) => {
             res.status(400).json({ error: 'Event ID is required' });
             return;
         }
-        await db.collection('Events').doc(id).delete();
+        await db.collection('Events').doc(id as string).delete();
         res.status(200).json({ success: true, message: 'Event deleted successfully' });
     } catch (err) {
         res.status(500).json({ success: false, error: (err as Error).message });
@@ -64,7 +64,7 @@ export const updateEvent = async (req: Request, res: Response) => {
             return;
         }
         const { title, date, time, description, location } = req.body;
-        await db.collection('Events').doc(id).update({ title, date, time, description, location });
+        await db.collection('Events').doc(id as string).update({ title, date, time, description, location });
         res.status(200).json({ success: true, message: 'Event updated successfully' });
     } catch (err) {
         res.status(500).json({ success: false, error: (err as Error).message });

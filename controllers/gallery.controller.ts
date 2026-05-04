@@ -55,7 +55,7 @@ export const updateGalleryImage = async (req: Request, res: Response) => {
             return;
         }
         const { name, imageUrl, uploaded } = req.body;
-        await db.collection('Gallery').doc(id).update({
+        await db.collection('Gallery').doc(id as string).update({
             ...(name && { name }),
             ...(imageUrl && { imageUrl }),
             ...(uploaded && { uploaded }),
@@ -74,7 +74,7 @@ export const deleteGalleryImage = async (req: Request, res: Response) => {
             res.status(400).json({ error: 'Gallery item ID is required' });
             return;
         }
-        await db.collection('Gallery').doc(id).delete();
+        await db.collection('Gallery').doc(id as string).delete();
         res.status(200).json({ success: true, message: 'Gallery item deleted successfully' });
     } catch (err) {
         res.status(500).json({ success: false, error: (err as Error).message });
